@@ -254,7 +254,17 @@ const LiveAudioScreen: React.FC<LiveAudioScreenProps> = ({ navigateTo, language,
 
   const stopSession = () => {
     if (sessionRef.current) {
-      sessionRef.current.then((session: any) => session.close()).catch(() => {});
+      sessionRef.current
+        .then((session: any) => {
+          if (session && typeof session.close === 'function') {
+            try {
+              const res = session.close();
+              if (res && typeof res.catch === 'function') res.catch(() => {});
+            } catch {}
+          }
+        })
+        .catch(() => {});
+      sessionRef.current = null;
     }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => {

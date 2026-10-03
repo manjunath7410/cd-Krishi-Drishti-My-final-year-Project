@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Store, User, Map, Sparkles } from 'lucide-react';
+import { Home, Store, User, Map } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Screen } from '../types';
 
@@ -8,10 +8,6 @@ interface BottomNavProps {
   onNavigate: (screen: Screen) => void;
   isExpandedView?: boolean;
 }
-
-const PRIMARY = '#00BB78';
-const DARK = '#001A11';
-const GRAY = '#64748B';
 
 const BottomNav: React.FC<BottomNavProps> = ({ currentScreen, onNavigate, isExpandedView = false }) => {
   const tabs = [
@@ -22,61 +18,53 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentScreen, onNavigate, isExpa
   ];
 
   return (
-    <div
-      className={`sticky bottom-0 w-full z-40 transition-all ${
+    <nav
+      aria-label="Bottom Navigation"
+      className={`fixed md:sticky bottom-0 left-0 right-0 w-full z-40 transition-all ${
         isExpandedView ? 'max-w-6xl mx-auto' : 'max-w-md mx-auto'
       }`}
-      style={{
-        fontFamily: 'Plus Jakarta Sans, sans-serif',
-      }}
+      style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
     >
       <div
-        className="w-full flex items-center justify-around px-3 py-2 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]"
+        className="w-full flex items-center justify-around px-3 py-2 bg-white border-t border-gray-100 shadow-[0_-4px_16px_rgba(0,0,0,0.03)]"
         style={{
-          paddingBottom: 'max(0.6rem, env(safe-area-inset-bottom))',
+          paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
         }}
       >
         {tabs.map(({ screen, icon: Icon, label }) => {
           const active = currentScreen === screen;
           return (
-            <motion.button
+            <button
               key={screen}
-              whileTap={{ scale: 0.92 }}
               onClick={() => onNavigate(screen)}
-              className="relative flex flex-col items-center justify-center py-1 px-4 rounded-2xl transition-all"
+              className="relative flex flex-col items-center justify-center min-h-[48px] min-w-[64px] py-1 px-3 rounded-2xl transition-all select-none"
             >
               {active && (
                 <motion.div
                   layoutId="activeTabPill"
-                  className="absolute inset-0 bg-emerald-50 rounded-2xl -z-10"
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  className="absolute inset-0 bg-[#E8FBF3] rounded-2xl -z-10"
+                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                 />
               )}
               <div className="relative">
                 <Icon
                   size={20}
                   strokeWidth={active ? 2.5 : 1.8}
-                  style={{ color: active ? PRIMARY : GRAY }}
+                  style={{ color: active ? '#00BB78' : '#8C9691' }}
                 />
-                {active && (
-                  <span
-                    className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full"
-                    style={{ background: PRIMARY }}
-                  />
-                )}
               </div>
               <span
-                className={`text-[10px] font-bold mt-1 tracking-tight transition-colors ${
-                  active ? 'text-emerald-700' : 'text-slate-500'
+                className={`text-[11px] font-bold mt-1 tracking-tight ${
+                  active ? 'text-[#001A11]' : 'text-[#8C9691]'
                 }`}
               >
                 {label}
               </span>
-            </motion.button>
+            </button>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 };
 

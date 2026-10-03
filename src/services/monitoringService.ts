@@ -276,11 +276,14 @@ export function initMonitoring() {
         message = 'Promise rejected without explicit reason';
       }
 
-      // Ignore silent aborts or benign cancellations
+      // Ignore silent aborts, benign cancellations, or transient socket close events on modal dismiss
       if (
         message.includes('AbortError') ||
         message.includes('aborted') ||
-        message.includes('ResizeObserver')
+        message.includes('ResizeObserver') ||
+        message.includes('WebSocket closed') ||
+        message.includes('WebSocket') ||
+        message.includes('socket closed')
       ) {
         return;
       }

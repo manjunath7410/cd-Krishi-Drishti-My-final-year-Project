@@ -741,7 +741,16 @@ const AppContent: React.FC = () => {
           />
         );
       case 'profile':
-        return <ProfileScreen onComplete={handleProfileComplete} t={t} navigateTo={navigateTo} onLogout={handleLogout} />;
+        return (
+          <ProfileScreen
+            onComplete={handleProfileComplete}
+            t={t}
+            navigateTo={navigateTo}
+            onLogout={handleLogout}
+            currentLang={language}
+            onLangChange={changeLanguage}
+          />
+        );
       case 'home':
         return <DashboardScreen
           navigateTo={navigateTo}
@@ -827,36 +836,36 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const showNav = !['landing', 'auth', 'profile', 'market-detail', 'live-audio', 'carbon-vault', 'scheme-setu', 'landmark', 'chat', 'vision', 'vision-result', 'acoustic-scanner', 'traceability', 'trace-verify', 'field-monitor', 'corporate-dashboard', 'crop-cycle', 'smart-irrigation', 'digital-twin', 'veo-studio', 'media-gallery', 'monitoring'].includes(currentScreen);
+  const showNav = !['landing', 'auth', 'market-detail', 'live-audio', 'carbon-vault', 'scheme-setu', 'landmark', 'chat', 'vision', 'vision-result', 'acoustic-scanner', 'traceability', 'trace-verify', 'field-monitor', 'corporate-dashboard', 'crop-cycle', 'smart-irrigation', 'digital-twin', 'veo-studio', 'media-gallery', 'monitoring'].includes(currentScreen);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-gray-900 flex flex-col selection:bg-emerald-500 selection:text-white" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+    <div className="min-h-screen bg-[#F7FAF8] text-[#10231D] flex flex-col selection:bg-[#00B86B] selection:text-white" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
       {/* ── DESKTOP/TABLET PRO APP BAR (Visible on md+ screens) ── */}
-      <header className="hidden md:flex items-center justify-between px-6 py-3 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 text-white z-50">
+      <header className="hidden md:flex items-center justify-between px-6 py-3 bg-white border-b border-[#E3EBE6] text-[#10231D] z-50">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+          <div className="w-8 h-8 rounded-xl bg-[#E8FBF3] border border-[#B3F0D2] flex items-center justify-center text-[#00B86B]">
             <Leaf size={18} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-sm tracking-tight text-white">Krishi-Drishti</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                PRO SUITE
+              <span className="font-extrabold text-sm tracking-tight text-[#10231D]">Krishi-Drishti</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8FBF3] text-[#003D2B] border border-[#B3F0D2]">
+                Farmer Edition
               </span>
             </div>
-            <p className="text-[10px] text-slate-400 font-medium">Enterprise Agritech &amp; Farm Intelligence</p>
+            <p className="text-[10px] text-[#68756F] font-medium">Smart Agricultural Intelligence &amp; Mandi Advisory</p>
           </div>
         </div>
 
         {/* Center: Viewport Mode Switcher & Global Search */}
         <div className="flex items-center gap-3">
-          <div className="bg-slate-800/80 p-1 rounded-xl flex items-center border border-slate-700/60">
+          <div className="bg-[#F7FAF8] p-1 rounded-xl flex items-center border border-[#E3EBE6]">
             <button
               onClick={() => setViewMode('mobile')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 viewMode === 'mobile'
-                  ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white text-[#003D2B] shadow-sm border border-[#E3EBE6]'
+                  : 'text-[#68756F] hover:text-[#10231D]'
               }`}
             >
               <Smartphone size={14} />
@@ -866,22 +875,22 @@ const AppContent: React.FC = () => {
               onClick={() => setViewMode('studio')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 viewMode === 'studio'
-                  ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-white text-[#003D2B] shadow-sm border border-[#E3EBE6]'
+                  : 'text-[#68756F] hover:text-[#10231D]'
               }`}
             >
               <Monitor size={14} />
-              Expanded Studio
+              Expanded View
             </button>
           </div>
 
           <button
             onClick={() => setIsCommandPaletteOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-1.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 rounded-xl text-xs font-medium text-slate-300 transition-colors"
+            className="flex items-center gap-2 px-3.5 py-1.5 bg-[#F7FAF8] hover:bg-[#EBF1EE] border border-[#E3EBE6] rounded-xl text-xs font-medium text-[#10231D] transition-colors"
           >
-            <Search size={14} className="text-emerald-400" />
+            <Search size={14} className="text-[#00B86B]" />
             <span>Search 20+ Tools...</span>
-            <kbd className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400 font-bold">
+            <kbd className="px-1.5 py-0.5 rounded bg-white border border-[#E3EBE6] text-[10px] font-mono text-[#68756F] font-bold">
               ⌘K
             </kbd>
           </button>
@@ -889,46 +898,31 @@ const AppContent: React.FC = () => {
 
         {/* Right: Live Telemetry & Emergency Hotline */}
         <div className="flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] font-mono text-slate-300">Gemini 2.5 Flash</span>
-          </div>
-
-          <div className="hidden lg:flex items-center gap-2 text-slate-300 text-[11px] bg-slate-800/60 px-2.5 py-1 rounded-lg border border-slate-700/50">
-            <Radio size={12} className={isLiveTracking ? "text-red-400 animate-pulse" : "text-emerald-400"} />
+          <div className="hidden lg:flex items-center gap-2 text-[#68756F] text-[11px] bg-[#F7FAF8] px-2.5 py-1 rounded-lg border border-[#E3EBE6]">
+            <Radio size={12} className={isLiveTracking ? "text-[#D64545] animate-pulse" : "text-[#00B86B]"} />
             <span>
               GPS: {userCoords ? `${userCoords.lat.toFixed(4)}°, ${userCoords.lng.toFixed(4)}° (${locationName.split(',')[0]})` : 'Locating GPS...'}
             </span>
-            {gpsAccuracy && (
-              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded font-mono">
-                ±{gpsAccuracy}m
-              </span>
-            )}
-            {isLiveTracking && (
-              <span className="text-[9px] uppercase font-bold bg-red-500/20 text-red-300 px-1 rounded animate-pulse">
-                Live
-              </span>
-            )}
           </div>
 
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-300">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#68756F]">
             {isOnline ? (
-              <span className="flex items-center gap-1 text-emerald-400 font-medium">
+              <span className="flex items-center gap-1 text-[#00B86B] font-semibold">
                 <Wifi size={13} /> Online
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-amber-400 font-medium">
-                <WifiOff size={13} /> Offline Sync
+              <span className="flex items-center gap-1 text-[#E6A000] font-semibold">
+                <WifiOff size={13} /> Offline
               </span>
             )}
           </div>
 
           <a
             href="tel:18001801551"
-            className="flex items-center gap-1.5 px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 rounded-lg text-xs font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1 bg-[#FDE8E8] hover:bg-[#FCD2D2] text-[#D64545] border border-[#F8B4B4] rounded-lg text-xs font-bold transition-colors"
           >
             <PhoneCall size={12} />
-            SOS 1800-180-1551
+            Kisan Call 1800-180-1551
           </a>
         </div>
       </header>
@@ -936,10 +930,10 @@ const AppContent: React.FC = () => {
       {/* ── APP CONTAINER WRAPPER ── */}
       <div className="flex-1 flex items-center justify-center p-0 md:p-4 overflow-hidden">
         <div
-          className={`flex flex-col h-screen md:h-[92vh] w-full mx-auto relative overflow-hidden bg-white text-gray-900 transition-all duration-300 ${
+          className={`flex flex-col h-screen md:h-[92vh] w-full mx-auto relative overflow-hidden bg-white text-[#10231D] transition-all duration-300 ${
             viewMode === 'studio'
-              ? 'max-w-6xl md:rounded-3xl md:shadow-2xl md:border md:border-slate-800'
-              : 'max-w-md md:rounded-[44px] md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] md:border-[10px] md:border-slate-900'
+              ? 'max-w-6xl md:rounded-3xl md:shadow-md md:border md:border-[#E3EBE6]'
+              : 'max-w-md md:rounded-[36px] md:shadow-lg md:border-2 md:border-[#E3EBE6]'
           }`}
           style={{ transform: 'translate(0)' }}
         >
@@ -1064,54 +1058,15 @@ const AppContent: React.FC = () => {
                 )}
               </AnimatePresence>
 
-              {/* Main FAB Button with pulse effect */}
+              {/* Floating Action Button for AI Assistant */}
               <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setFabMenuOpen(!fabMenuOpen)}
-                whileTap={{ scale: 0.9 }}
-                className="absolute bottom-20 right-4 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center z-[101] overflow-hidden"
-                style={{
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)',
-                  boxShadow: '0 8px 30px rgba(16, 185, 129, 0.45)',
-                }}
+                className="absolute bottom-20 right-4 w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 text-white rounded-full shadow-2xl shadow-emerald-500/50 flex items-center justify-center z-[101] border-2 border-white/30"
               >
-                {/* Pulse rings */}
-                {!fabMenuOpen && (
-                  <>
-                    <motion.div
-                      animate={{
-                        scale: [1, 1.8],
-                        opacity: [0.5, 0],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeOut",
-                      }}
-                      className="absolute inset-0 rounded-full bg-green-400"
-                    />
-                    <motion.div
-                      animate={{
-                        scale: [1, 1.8],
-                        opacity: [0.5, 0],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeOut",
-                        delay: 1,
-                      }}
-                      className="absolute inset-0 rounded-full bg-emerald-400"
-                    />
-                  </>
-                )}
-
-                {/* Icon with rotation animation */}
-                <motion.div
-                  animate={{ rotate: fabMenuOpen ? 135 : 0 }}
-                  transition={{ type: "spring", stiffness: 200 }}
-                  className="relative z-10"
-                >
-                  <Sparkles size={24} className="text-white drop-shadow-lg" />
+                <motion.div animate={{ rotate: fabMenuOpen ? 45 : 0 }} transition={{ duration: 0.2 }}>
+                  <Sparkles size={24} />
                 </motion.div>
               </motion.button>
             </>

@@ -1,7 +1,4 @@
-// Design tokens from template
-const C = { primary: '#00BB78', dark: '#001A11', gray: '#616B68', mint: '#A5FFA7', bg: '#E8FBF3' };
-
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Screen, Listing } from '../types';
 import { marketService, getUserLocation } from '../src/services/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +14,7 @@ import {
   ArrowLeft,
   ChevronRight,
   Leaf,
+  Store,
 } from 'lucide-react';
 
 interface MarketScreenProps {
@@ -42,12 +40,18 @@ const MarketScreen: React.FC<MarketScreenProps> = ({ navigateTo, t }) => {
       } catch (e) {}
     };
     loadUser();
-    getUserLocation().then(loc => setLocation(loc)).catch(() => {});
+    getUserLocation().then((loc) => setLocation(loc)).catch(() => {});
   }, []);
 
   const [newListing, setNewListing] = useState({
-    crop: '', price: '', quantity: '', loc: '',
-    category: 'Crop', description: '', isOrganic: false, image: ''
+    crop: '',
+    price: '',
+    quantity: '',
+    loc: '',
+    category: 'Crop',
+    description: '',
+    isOrganic: false,
+    image: '',
   });
 
   const VERIFIED_LAND_ACRES = userProfile?.land_size || 2.5;
@@ -56,14 +60,33 @@ const MarketScreen: React.FC<MarketScreenProps> = ({ navigateTo, t }) => {
 
   const filteredListings = useMemo(() => {
     let result = listings;
-    if (tab === 'grains') result = result.filter(l => ['wheat', 'rice', 'corn', 'soybean'].some(c => l.crop.toLowerCase().includes(c)));
-    if (tab === 'fruits') result = result.filter(l => ['mango', 'apple', 'banana', 'grapes'].some(c => l.crop.toLowerCase().includes(c)));
-    if (tab === 'vegetables') result = result.filter(l => ['potato', 'onion', 'tomato', 'brinjal'].some(c => l.crop.toLowerCase().includes(c)));
-    if (searchQuery) result = result.filter(l => l.crop.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (tab === 'grains') {
+      result = result.filter((l) =>
+        ['wheat', 'rice', 'corn', 'soybean', 'cotton'].some((c) => l.crop.toLowerCase().includes(c))
+      );
+    }
+    if (tab === 'fruits') {
+      result = result.filter((l) =>
+        ['mango', 'apple', 'banana', 'grapes'].some((c) => l.crop.toLowerCase().includes(c))
+      );
+    }
+    if (tab === 'vegetables') {
+      result = result.filter((l) =>
+        ['potato', 'onion', 'tomato', 'brinjal'].some((c) => l.crop.toLowerCase().includes(c))
+      );
+    }
+    if (searchQuery) {
+      result = result.filter((l) =>
+        l.crop.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        l.loc?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
     return result;
   }, [listings, tab, searchQuery]);
 
-  useEffect(() => { fetchListings(); }, [location]);
+  useEffect(() => {
+    fetchListings();
+  }, [location]);
 
   const fetchListings = async () => {
     try {
@@ -85,16 +108,25 @@ const MarketScreen: React.FC<MarketScreenProps> = ({ navigateTo, t }) => {
       quantity: `${newListing.quantity}kg`,
       price: `₹${newListing.price}/${newListing.category === 'Crop' ? 'kg' : 'unit'}`,
       location: newListing.loc || 'My Farm',
-      description: newListing.description || 'Fresh produce listed via Mandi Direct.',
+      description: newListing.description || 'Fresh produce listed directly by farmer.',
       is_organic: newListing.isOrganic,
-      image_url: newListing.image
+      image_url: newListing.image,
     };
     try {
       setLoading(true);
       const createdListing = await marketService.createListing(entryData);
-      setListings(prev => [createdListing, ...prev]);
+      setListings((prev) => [createdListing, ...prev]);
       setShowAddForm(false);
-      setNewListing({ crop: '', price: '', quantity: '', loc: '', category: 'Crop', description: '', isOrganic: false, image: '' });
+      setNewListing({
+        crop: '',
+        price: '',
+        quantity: '',
+        loc: '',
+        category: 'Crop',
+        description: '',
+        isOrganic: false,
+        image: '',
+      });
     } catch (e: any) {
       alert('Failed to create listing');
     } finally {
@@ -103,94 +135,78 @@ const MarketScreen: React.FC<MarketScreenProps> = ({ navigateTo, t }) => {
   };
 
   const TABS = [
-    { key: 'all', label: 'All' },
-    { key: 'grains', label: 'Grains' },
+    { key: 'all', label: 'All Crops' },
+    { key: 'grains', label: 'Grains & Pulses' },
     { key: 'vegetables', label: 'Vegetables' },
     { key: 'fruits', label: 'Fruits' },
   ];
 
   return (
-    <div className="bg-white min-h-full pb-24" style={{ fontFamily: 'Inter, sans-serif' }}>
-
+    <div
+      className="bg-white min-h-full pb-24 text-[#10231D]"
+      style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}
+    >
       {/* ─── HEADER ─── */}
-      <div className="px-5 pt-12 pb-4 flex items-center justify-between bg-white sticky top-0 z-30" style={{ borderBottom: '1px solid #F0F0F0' }}>
+      <div className="px-5 pt-11 pb-4 flex items-center justify-between bg-white sticky top-0 z-30 border-b border-[#E3EBE6]">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigateTo('home')} className="w-8 h-8 flex items-center justify-center rounded-full active:scale-95 transition-transform" style={{ background: '#F5F5F5', border: '1px solid #EBEBEB' }}>
-            <ArrowLeft size={16} style={{ color: C.dark }} />
+          <button
+            onClick={() => navigateTo('home')}
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#F7FAF8] border border-[#E3EBE6] text-[#10231D] active:scale-95 transition-transform"
+          >
+            <ArrowLeft size={16} />
           </button>
           <div>
-            <h1 className="text-lg font-bold" style={{ color: C.dark }}>Marketplace</h1>
+            <h1 className="text-lg font-extrabold text-[#10231D]">Mandi &amp; Marketplace</h1>
             <div className="flex items-center gap-1 mt-0.5">
-              <MapPin size={11} style={{ color: C.primary }} />
-              <span className="text-[11px]" style={{ color: C.gray }}>Nagpur, India</span>
+              <MapPin size={11} className="text-[#00B86B]" />
+              <span className="text-[11px] font-semibold text-[#68756F]">Wardha &amp; Nagpur APMC Hub</span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-1.5 text-white text-xs font-semibold px-3.5 py-2 rounded-xl active:scale-95 transition-transform"
-            style={{ background: C.primary }}
-          >
-            <Plus size={14} strokeWidth={2.5} />
-            Sell
-          </button>
-        </div>
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="min-h-[40px] px-3.5 rounded-xl bg-[#003D2B] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform hover:bg-[#002A1E]"
+        >
+          <Plus size={14} />
+          <span>Sell Crop</span>
+        </button>
       </div>
 
       {/* ─── SEARCH BAR ─── */}
-      <div className="px-5 pt-4 pb-3">
-        <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
-          <Search size={16} className="text-gray-400 flex-shrink-0" />
+      <div className="px-5 pt-4 pb-2">
+        <div className="flex items-center gap-2.5 bg-[#F7FAF8] border border-[#E3EBE6] rounded-xl px-3.5 py-2.5">
+          <Search size={16} className="text-[#68756F] shrink-0" />
           <input
             type="text"
-            placeholder="Search crop, location..."
-            className="flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder-gray-400"
+            placeholder="Search crop, mandi, buyer location..."
+            className="flex-1 bg-transparent text-sm text-[#10231D] outline-none placeholder-[#68756F]"
             value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
 
-      {/* ─── AI MANDI PRICE INTELLIGENCE ─── */}
-      <div className="px-5 mb-4">
+      {/* ─── 1. MANDI INTELLIGENCE (LIVE PRICE, MODEL FORECAST & MSP) ─── */}
+      <div className="px-5 my-3">
         <MandiPricePredictor />
       </div>
 
-      {/* ─── FEATURED BANNER ─── */}
-      <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #166534 0%, #15803d 100%)' }}>
-        <div className="flex items-center p-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-1.5 mb-1">
-              <TrendingUp size={12} className="text-green-300" />
-              <span className="text-[10px] font-semibold text-green-300 uppercase tracking-wider">Featured Products</span>
-            </div>
-            <h2 className="text-base font-bold text-white leading-snug">Organic Wheat</h2>
-            <p className="text-xs text-green-200 mt-0.5">₹2400 / quintal · Nagpur</p>
-            <button className="mt-2.5 bg-white text-green-700 text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-transform">
-              Shop Now
-            </button>
-          </div>
-          <img
-            src="https://images.unsplash.com/photo-1501430654243-c934cec2e1c0?w=300&q=80"
-            className="w-20 h-20 object-cover rounded-xl ml-4 flex-shrink-0"
-            alt="Wheat"
-          />
-        </div>
-      </div>
-
-      {/* ─── CATEGORY TABS ─── */}
+      {/* ─── 2. CATEGORY TABS FOR DIRECT LISTINGS ─── */}
       <div className="px-5 mb-3">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-sm font-bold text-[#10231D]">Direct Farmer Listings</h2>
+          <span className="text-xs text-[#68756F]">{filteredListings.length} verified lots</span>
+        </div>
         <div className="flex gap-2 overflow-x-auto no-scrollbar">
-          {TABS.map(t => (
+          {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key as any)}
-              className="px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors flex-shrink-0"
-              style={{
-                background: tab === t.key ? C.primary : '#F5F5F5',
-                color: tab === t.key ? '#fff' : C.gray,
-              }}
+              className={`min-h-[38px] px-3.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors border ${
+                tab === t.key
+                  ? 'bg-[#003D2B] text-white border-[#003D2B]'
+                  : 'bg-[#F7FAF8] text-[#10231D] border-[#E3EBE6] hover:bg-[#EBF1EE]'
+              }`}
             >
               {t.label}
             </button>
@@ -198,48 +214,41 @@ const MarketScreen: React.FC<MarketScreenProps> = ({ navigateTo, t }) => {
         </div>
       </div>
 
-      {/* ─── SECTION TITLE ─── */}
-      <div className="px-5 mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-bold text-gray-800">Fresh Listings</h2>
-        <span className="text-xs text-gray-400">{filteredListings.length} results</span>
-      </div>
-
       {/* ─── LISTINGS ─── */}
       <div className="px-5">
         {loading ? (
           <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-24 rounded-2xl animate-pulse" style={{ background: '#F5F5F5' }} />
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-24 rounded-2xl bg-[#F7FAF8] border border-[#E3EBE6] animate-pulse" />
             ))}
           </div>
         ) : filteredListings.length === 0 ? (
-          <div className="py-16 flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3" style={{ background: C.bg }}>
-              <ShoppingCart size={28} style={{ color: C.primary }} />
+          <div className="py-12 flex flex-col items-center text-center bg-[#F7FAF8] border-2 border-dashed border-[#E3EBE6] rounded-2xl p-6">
+            <div className="w-12 h-12 rounded-xl bg-[#E8FBF3] border border-[#B3F0D2] flex items-center justify-center mb-2 text-[#00B86B]">
+              <Store size={22} />
             </div>
-            <p className="text-sm font-semibold" style={{ color: C.dark }}>No listings found</p>
-            <p className="text-xs mt-1" style={{ color: C.gray }}>Be the first to add a listing</p>
+            <h3 className="text-sm font-bold text-[#10231D]">No crop listings in this filter</h3>
+            <p className="text-xs text-[#68756F] mt-1 mb-3">
+              List your harvested lot to receive offers directly from verified millers.
+            </p>
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="min-h-[40px] px-4 rounded-xl bg-[#00B86B] text-white text-xs font-bold"
+            >
+              Create New Listing
+            </button>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {filteredListings.map((item) => (
-              <motion.div
+              <div
                 key={item.id}
                 role="button"
                 tabIndex={0}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => navigateTo('market-detail', { listing: item })}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    navigateTo('market-detail', { listing: item });
-                  }
-                }}
-                className="w-full flex items-center gap-4 p-3.5 bg-white rounded-2xl text-left transition-colors cursor-pointer select-none"
-                style={{ border: '1px solid #F0F0F0', boxShadow: '0 1px 4px rgba(0,187,120,0.04)' }}
+                className="w-full flex items-center gap-3.5 p-3.5 bg-white rounded-2xl text-left border border-[#E3EBE6] hover:bg-[#F7FAF8] transition-colors cursor-pointer shadow-[0_1px_3px_rgba(16,35,29,0.03)]"
               >
-                {/* Crop image */}
-                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0" style={{ border: '1px solid #F0F0F0' }}>
+                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-[#E3EBE6] bg-[#F7FAF8]">
                   <img
                     src={item.image || `https://images.unsplash.com/photo-1501430654243-c934cec2e1c0?w=200&q=80`}
                     alt={item.crop}
@@ -247,33 +256,34 @@ const MarketScreen: React.FC<MarketScreenProps> = ({ navigateTo, t }) => {
                   />
                 </div>
 
-                {/* Details */}
                 <div className="flex-1 min-w-0">
-                  {item.isOrganic && (
-                    <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: C.primary }}>Organic</span>
-                  )}
-                  <h3 className="text-sm font-bold mt-0.5 truncate" style={{ color: C.dark }}>{item.crop}</h3>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <MapPin size={10} style={{ color: C.gray }} />
-                    <span className="text-[11px] truncate" style={{ color: C.gray }}>{item.loc}</span>
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-sm font-bold text-[#10231D] truncate">{item.crop}</h3>
+                    {item.isOrganic && (
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-[#E8FBF3] text-[#007A48] border border-[#B3F0D2]">
+                        Organic
+                      </span>
+                    )}
                   </div>
-                  <p className="text-sm font-bold mt-1" style={{ color: C.primary }}>
-                    {item.price.split('/')[0]}<span className="text-xs font-normal" style={{ color: C.gray }}>/{item.price.split('/')[1]}</span>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <MapPin size={10} className="text-[#68756F]" />
+                    <span className="text-[11px] text-[#68756F] truncate">{item.loc}</span>
+                  </div>
+                  <p className="text-sm font-extrabold text-[#003D2B] mt-1">
+                    {item.price.split('/')[0]}
+                    <span className="text-xs font-medium text-[#68756F]">
+                      /{item.price.split('/')[1] || 'kg'}
+                    </span>
                   </p>
                 </div>
 
-                {/* Action */}
-                <div className="flex-shrink-0 flex flex-col items-end gap-2">
-                  <span
-                    className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg"
-                    style={{ background: C.bg, color: C.primary, border: `1px solid ${C.mint}` }}
-                  >
-                    <ShoppingCart size={12} />
-                    Buy
+                <div className="shrink-0 flex items-center gap-1">
+                  <span className="text-xs font-bold text-[#007A48] px-2.5 py-1 rounded-lg bg-[#E8FBF3] border border-[#B3F0D2]">
+                    Buy Lot
                   </span>
-                  <ChevronRight size={14} style={{ color: C.mint }} />
+                  <ChevronRight size={14} className="text-[#68756F]" />
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
@@ -282,12 +292,7 @@ const MarketScreen: React.FC<MarketScreenProps> = ({ navigateTo, t }) => {
       {/* ─── SELL FORM MODAL ─── */}
       <AnimatePresence>
         {showAddForm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50"
-          >
+          <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50">
             <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
@@ -295,106 +300,129 @@ const MarketScreen: React.FC<MarketScreenProps> = ({ navigateTo, t }) => {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl flex flex-col max-h-[92vh]"
             >
-              {/* Modal header */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                <h3 className="text-base font-bold text-gray-900">New Listing</h3>
-                <button onClick={() => setShowAddForm(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 active:scale-95 transition-transform">
-                  <X size={16} className="text-gray-500" />
+              <div className="flex items-center justify-between px-5 py-4 border-b border-[#E3EBE6]">
+                <h3 className="text-base font-bold text-[#10231D]">Post New Crop for Sale</h3>
+                <button
+                  onClick={() => setShowAddForm(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F7FAF8] border border-[#E3EBE6] text-[#68756F]"
+                >
+                  <X size={16} />
                 </button>
               </div>
 
               <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-                {/* Image picker */}
-                <div className="relative h-36 rounded-2xl bg-gray-50 border border-dashed border-gray-200 overflow-hidden flex items-center justify-center">
+                {/* Photo upload */}
+                <div className="relative h-32 rounded-2xl bg-[#F7FAF8] border border-dashed border-[#E3EBE6] overflow-hidden flex items-center justify-center">
                   {newListing.image ? (
                     <>
                       <img src={newListing.image} className="w-full h-full object-cover" />
-                      <button onClick={() => setNewListing({ ...newListing, image: '' })} className="absolute top-2 right-2 w-7 h-7 bg-black/50 text-white rounded-full flex items-center justify-center">
+                      <button
+                        onClick={() => setNewListing({ ...newListing, image: '' })}
+                        className="absolute top-2 right-2 w-7 h-7 bg-black/60 text-white rounded-full flex items-center justify-center"
+                      >
                         <X size={13} />
                       </button>
                     </>
                   ) : (
-                    <button onClick={() => document.getElementById('file-upload')?.click()} className="flex flex-col items-center gap-2 text-gray-400">
-                      <Camera size={24} />
-                      <span className="text-xs font-semibold">Add Photo</span>
+                    <button
+                      onClick={() => document.getElementById('market-file-upload')?.click()}
+                      className="flex flex-col items-center gap-1.5 text-[#68756F]"
+                    >
+                      <Camera size={22} className="text-[#00B86B]" />
+                      <span className="text-xs font-bold text-[#10231D]">Add Photo of Harvest</span>
                     </button>
                   )}
                 </div>
-                <input type="file" id="file-upload" className="hidden" accept="image/*"
-                  onChange={e => {
+                <input
+                  type="file"
+                  id="market-file-upload"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
                       const reader = new FileReader();
-                      reader.onloadend = () => setNewListing({ ...newListing, image: reader.result as string });
+                      reader.onloadend = () =>
+                        setNewListing({ ...newListing, image: reader.result as string });
                       reader.readAsDataURL(file);
                     }
                   }}
                 />
 
-                {/* Form fields */}
-                {[
-                  { label: 'Crop Name', key: 'crop', placeholder: 'e.g. Tomato', type: 'text' },
-                  { label: 'Description', key: 'description', placeholder: 'Describe quality…', type: 'text' },
-                ].map(field => (
-                  <div key={field.key}>
-                    <label className="text-xs font-semibold text-gray-500 mb-1.5 block">{field.label}</label>
-                    <input
-                      type={field.type}
-                      placeholder={field.placeholder}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:border-green-400 transition-colors"
-                      value={(newListing as any)[field.key]}
-                      onChange={e => setNewListing({ ...newListing, [field.key]: e.target.value })}
-                    />
-                  </div>
-                ))}
+                <div>
+                  <label className="text-xs font-bold text-[#68756F] mb-1 block">Crop Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Sharbati Wheat"
+                    className="w-full bg-[#F7FAF8] border border-[#E3EBE6] rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[#10231D] outline-none focus:border-[#00B86B]"
+                    value={newListing.crop}
+                    onChange={(e) => setNewListing({ ...newListing, crop: e.target.value })}
+                  />
+                </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 mb-1.5 block">Price (₹)</label>
+                    <label className="text-xs font-bold text-[#68756F] mb-1 block">Expected Price (₹)</label>
                     <input
-                      type="number" placeholder="e.g. 2400"
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:border-green-400 transition-colors"
+                      type="number"
+                      placeholder="e.g. 2600"
+                      className="w-full bg-[#F7FAF8] border border-[#E3EBE6] rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[#10231D] outline-none focus:border-[#00B86B]"
                       value={newListing.price}
-                      onChange={e => setNewListing({ ...newListing, price: e.target.value })}
+                      onChange={(e) => setNewListing({ ...newListing, price: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 mb-1.5 block">Qty (kg)</label>
+                    <label className="text-xs font-bold text-[#68756F] mb-1 block">Quantity (kg)</label>
                     <input
-                      type="number" placeholder="e.g. 500"
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none focus:border-green-400 transition-colors"
+                      type="number"
+                      placeholder="e.g. 1500"
+                      className="w-full bg-[#F7FAF8] border border-[#E3EBE6] rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[#10231D] outline-none focus:border-[#00B86B]"
                       value={newListing.quantity}
-                      onChange={e => setNewListing({ ...newListing, quantity: e.target.value })}
+                      onChange={(e) => setNewListing({ ...newListing, quantity: e.target.value })}
                     />
                   </div>
                 </div>
 
-                {/* Organic toggle */}
-                <div className="flex items-center justify-between p-3.5 bg-gray-50 border border-gray-200 rounded-xl">
+                <div>
+                  <label className="text-xs font-bold text-[#68756F] mb-1 block">Village / APMC</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Wardha APMC Yard"
+                    className="w-full bg-[#F7FAF8] border border-[#E3EBE6] rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[#10231D] outline-none focus:border-[#00B86B]"
+                    value={newListing.loc}
+                    onChange={(e) => setNewListing({ ...newListing, loc: e.target.value })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-[#F7FAF8] border border-[#E3EBE6] rounded-xl">
                   <div className="flex items-center gap-2">
-                    <Leaf size={16} className="text-green-600" />
-                    <span className="text-sm font-semibold text-gray-800">Mark as Organic</span>
+                    <Leaf size={16} className="text-[#00B86B]" />
+                    <span className="text-xs font-bold text-[#10231D]">Organic Certified</span>
                   </div>
                   <button
                     onClick={() => setNewListing({ ...newListing, isOrganic: !newListing.isOrganic })}
-                    className={`w-11 h-6 rounded-full transition-colors relative ${newListing.isOrganic ? 'bg-green-500' : 'bg-gray-300'}`}
+                    className={`w-10 h-6 rounded-full transition-colors relative ${
+                      newListing.isOrganic ? 'bg-[#00B86B]' : 'bg-[#E3EBE6]'
+                    }`}
                   >
-                    <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${newListing.isOrganic ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                    <div
+                      className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                        newListing.isOrganic ? 'translate-x-4' : 'translate-x-0.5'
+                      }`}
+                    />
                   </button>
                 </div>
 
-                {/* Submit */}
                 <button
                   onClick={handleAddListing}
-                  disabled={isOverQuota || !newListing.crop || !newListing.price}
-                  className="w-full py-4 text-white font-bold rounded-2xl text-sm active:scale-95 transition-transform disabled:opacity-40"
-                  style={{ background: C.primary }}
+                  disabled={!newListing.crop || !newListing.price}
+                  className="w-full min-h-[48px] text-white font-bold rounded-xl text-sm bg-[#003D2B] hover:bg-[#002A1E] transition-all disabled:opacity-40"
                 >
-                  Post Listing
+                  Post Crop Listing
                 </button>
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

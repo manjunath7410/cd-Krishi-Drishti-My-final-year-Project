@@ -31,6 +31,8 @@ backend/bioacoustic_service/venv/
 .env.production
 .env.development
 *.env
+firebase-applet-config.json
+firebase_applet_config.xml
 
 # Python build artifacts
 __pycache__/

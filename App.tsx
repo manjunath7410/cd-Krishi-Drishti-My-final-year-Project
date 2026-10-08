@@ -10,67 +10,58 @@ import {
   Leaf,
   Wifi,
   WifiOff,
-  RefreshCw,
-  Smartphone,
-  Monitor,
-  Search,
-  PhoneCall,
-  ShieldCheck,
-  Battery,
-  Radio
+  RefreshCw
 } from 'lucide-react';
+// ── CRITICAL screens: bundled eagerly so the first paint is instant ──
 import AuthScreen from './screens/AuthScreen';
-import ProfileScreen from './screens/ProfileScreen';
 import DashboardScreen from './screens/DashboardScreen';
-import ChatScreen from './screens/ChatScreen';
-import VisionScreen from './screens/VisionScreen';
-import VisionResultScreen from './screens/VisionResultScreen';
-import MarketScreen from './screens/MarketScreen';
-import MarketDetailScreen from './screens/MarketDetailScreen';
-import InsuranceScreen from './screens/InsuranceScreen';
-import ForecastScreen from './screens/ForecastScreen';
-import SchemeSetuScreen from './screens/SchemeSetuScreen';
 import SplashScreen from './screens/SplashScreen';
-import LandingScreen from './screens/LandingScreen';
 import BottomNav from './components/BottomNav';
-import VoiceAssistantModal from './components/VoiceAssistantModal';
-import CommandPalette from './components/CommandPalette';
-import { SentryErrorBoundary } from './components/SentryErrorBoundary';
-import { userService, weatherService, getUserLocation, getPinpointLocation, watchRealTimeLocation } from './src/services/api';
+import LandingScreen from './screens/LandingScreen';
+import { userService, weatherService, getUserLocation } from './src/services/api';
 import { translations } from './translations';
 import { LanguageProvider } from './src/context/LanguageContext';
-import { AuthProvider } from './src/context/AuthContext';
 
-// Performance Code-Splitting for heavy secondary modules
-const FarmMapScreen = React.lazy(() => import('./screens/FarmMapScreen'));
-const LiveAudioScreen = React.lazy(() => import('./screens/LiveAudioScreen'));
-const CarbonVaultScreen = React.lazy(() => import('./screens/CarbonVaultScreen'));
-const CropStressScreen = React.lazy(() => import('./screens/CropStressScreen'));
-const LandMarkingScreen = React.lazy(() => import('./screens/LandMarkingScreen'));
-const AcousticScannerScreen = React.lazy(() => import('./screens/AcousticScannerScreen'));
-const SoilCarbonModelScreen = React.lazy(() => import('./screens/SoilCarbonModelScreen'));
-const TraceabilityScreen = React.lazy(() => import('./screens/TraceabilityScreen'));
-const TraceabilityVerifyScreen = React.lazy(() => import('./screens/TraceabilityVerifyScreen'));
-const AgritechDashboardNew = React.lazy(() => import('./screens/AgritechDashboardNew'));
-const FieldMonitorScreen = React.lazy(() => import('./screens/FieldMonitorScreen'));
-const CorporateDashboardScreen = React.lazy(() => import('./screens/CorporateDashboardScreen'));
-const CropCycleScreen = React.lazy(() => import('./screens/CropCycleScreen'));
-const FarmerMarketplaceScreen = React.lazy(() => import('./screens/FarmerMarketplaceScreen'));
-const SmartIrrigationScreen = React.lazy(() => import('./screens/SmartIrrigationScreen'));
-const DigitalTwinScreen = React.lazy(() => import('./screens/DigitalTwinScreen'));
-const VeoStudioScreen = React.lazy(() => import('./screens/VeoStudioScreen').then(m => ({ default: m.VeoStudioScreen })));
-const MediaGalleryScreen = React.lazy(() => import('./screens/MediaGalleryScreen').then(m => ({ default: m.MediaGalleryScreen })));
-const MonitoringDashboardScreen = React.lazy(() => import('./screens/MonitoringDashboardScreen'));
+// ── All other screens: code-split via React.lazy so the initial JS bundle
+//    stays small. Each screen (and its heavy deps — leaflet maps, three.js
+//    globes, @google/genai live audio, QR codes) is only downloaded when the
+//    user actually navigates to it. Vite emits them as async chunks. ──
+const lazy = <T extends React.ComponentType<any>>(factory: () => Promise<{ default: T }>) =>
+  React.lazy(factory as unknown as () => Promise<{ default: T }>);
 
-// Ultra-fast Skeleton loader for lazy screens
-const ScreenSkeleton: React.FC = () => (
-  <div className="flex flex-col items-center justify-center min-h-[65vh] p-8 space-y-4">
-    <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shadow-sm animate-pulse">
-      <Leaf className="w-6 h-6 animate-spin" style={{ animationDuration: '4s' }} />
-    </div>
-    <div className="text-center space-y-2">
-      <div className="h-4 w-32 bg-gray-200 rounded-full animate-pulse mx-auto" />
-      <div className="h-3 w-20 bg-gray-100 rounded-full animate-pulse mx-auto" />
+const ProfileScreen = lazy(() => import('./screens/ProfileScreen'));
+const ChatScreen = lazy(() => import('./screens/ChatScreen'));
+const VisionScreen = lazy(() => import('./screens/VisionScreen'));
+const VisionResultScreen = lazy(() => import('./screens/VisionResultScreen'));
+const FarmMapScreen = lazy(() => import('./screens/FarmMapScreen'));
+const MarketScreen = lazy(() => import('./screens/MarketScreen'));
+const MarketDetailScreen = lazy(() => import('./screens/MarketDetailScreen'));
+const InsuranceScreen = lazy(() => import('./screens/InsuranceScreen'));
+const ForecastScreen = lazy(() => import('./screens/ForecastScreen'));
+const LiveAudioScreen = lazy(() => import('./screens/LiveAudioScreen'));
+const CarbonVaultScreen = lazy(() => import('./screens/CarbonVaultScreen'));
+const SchemeSetuScreen = lazy(() => import('./screens/SchemeSetuScreen'));
+const CropStressScreen = lazy(() => import('./screens/CropStressScreen'));
+const LandMarkingScreen = lazy(() => import('./screens/LandMarkingScreen'));
+const VoiceAssistantModal = lazy(() => import('./components/VoiceAssistantModal'));
+const AcousticScannerScreen = lazy(() => import('./screens/AcousticScannerScreen'));
+const SoilCarbonModelScreen = lazy(() => import('./screens/SoilCarbonModelScreen'));
+const TraceabilityScreen = lazy(() => import('./screens/TraceabilityScreen'));
+const TraceabilityVerifyScreen = lazy(() => import('./screens/TraceabilityVerifyScreen'));
+const AgritechDashboardNew = lazy(() => import('./screens/AgritechDashboardNew'));
+const FieldMonitorScreen = lazy(() => import('./screens/FieldMonitorScreen'));
+const CorporateDashboardScreen = lazy(() => import('./screens/CorporateDashboardScreen'));
+const CropCycleScreen = lazy(() => import('./screens/CropCycleScreen'));
+const FarmerMarketplaceScreen = lazy(() => import('./screens/FarmerMarketplaceScreen'));
+const SmartIrrigationScreen = lazy(() => import('./screens/SmartIrrigationScreen'));
+const DigitalTwinScreen = lazy(() => import('./screens/DigitalTwinScreen'));
+
+/** Lightweight spinner shown while a lazily-loaded screen chunk downloads */
+const ScreenFallback: React.FC = () => (
+  <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-10 h-10 rounded-full border-4 border-green-200 border-t-green-600 animate-spin" />
+      <span className="text-xs font-bold text-green-800/60 uppercase tracking-widest">Loading…</span>
     </div>
   </div>
 );
@@ -78,14 +69,57 @@ const ScreenSkeleton: React.FC = () => (
 const App: React.FC = () => {
   return (
     <LanguageProvider>
-      <AuthProvider>
-        <SentryErrorBoundary fallbackTitle="Krishi-Drishti System Recovery" onReset={() => window.location.reload()}>
-          <AppContent />
-        </SentryErrorBoundary>
-      </AuthProvider>
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
     </LanguageProvider>
   );
 };
+
+interface ErrorBoundaryState { hasError: boolean; error: Error | null; }
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, ErrorBoundaryState> {
+  state: ErrorBoundaryState = { hasError: false, error: null };
+  declare props: { children: React.ReactNode };
+
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-red-100 p-6 flex items-center justify-center">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 border border-red-100"
+          >
+            <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-red-200">
+              <AlertTriangle className="w-10 h-10 text-white" />
+            </div>
+            <h1 className="text-2xl font-black text-gray-900 mb-2 text-center">Oops! Something Broke</h1>
+            <p className="text-sm text-gray-500 text-center mb-4">Don't worry, we can fix this</p>
+            <pre className="text-xs font-mono bg-gray-50 p-4 rounded-2xl border border-gray-200 whitespace-pre-wrap max-h-40 overflow-auto text-red-700">
+              {this.state.error?.toString()}
+            </pre>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-6 w-full px-4 py-4 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-2xl font-bold shadow-lg shadow-red-200 active:scale-95 transition-transform flex items-center justify-center gap-2"
+            >
+              <RefreshCw className="w-5 h-5" />
+              Reload App
+            </button>
+          </motion.div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const AppContent: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -102,142 +136,10 @@ const AppContent: React.FC = () => {
   const [weather, setWeather] = useState<any>(null);
   const [locationName, setLocationName] = useState<string>("Locating...");
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
-  const [isLiveTracking, setIsLiveTracking] = useState<boolean>(false);
   const locationFetched = useRef(false);
-
-  // ── Update app location with coordinate persistence and reverse geocoding ──
-  const updateAppLocation = React.useCallback(async (
-    coords: { lat: number; lng: number; accuracy?: number; name?: string },
-    persist = true
-  ) => {
-    setUserCoords({ lat: coords.lat, lng: coords.lng });
-    if (coords.accuracy !== undefined) setGpsAccuracy(coords.accuracy);
-
-    const hasExplicitName = !!coords.name && !coords.name.startsWith('Pinpoint (');
-
-    if (coords.name) {
-      setLocationName(coords.name);
-    }
-
-    if (persist) {
-      try {
-        localStorage.setItem('kd_saved_location', JSON.stringify({
-          lat: coords.lat,
-          lng: coords.lng,
-          name: coords.name,
-          accuracy: coords.accuracy
-        }));
-      } catch {}
-    }
-
-    try {
-      const rev = await weatherService.reverseGeocode(coords.lat, coords.lng);
-      // If user explicitly picked a name like "Bidadi Chatra", keep their custom title while enriching with district/state
-      let formattedName = rev.formatted || rev.city || `${coords.lat.toFixed(3)}°, ${coords.lng.toFixed(3)}°`;
-      if (hasExplicitName && coords.name) {
-        if (!coords.name.includes(',') && rev.district) {
-          formattedName = `${coords.name}, ${rev.district}`;
-        } else {
-          formattedName = coords.name;
-        }
-      }
-
-      setLocationName(formattedName);
-      if (persist) {
-        try {
-          localStorage.setItem('kd_saved_location', JSON.stringify({
-            lat: coords.lat,
-            lng: coords.lng,
-            name: formattedName,
-            accuracy: coords.accuracy
-          }));
-        } catch {}
-      }
-
-      // Sync user profile with real detected district
-      setUser((prevUser) => {
-        if (!prevUser) return prevUser;
-        return {
-          ...prevUser,
-          location: { lat: coords.lat, lng: coords.lng },
-          district: rev.district || prevUser.district,
-        };
-      });
-    } catch {
-      if (!coords.name) {
-        setLocationName(`Pinpoint (${coords.lat.toFixed(3)}°, ${coords.lng.toFixed(3)}°)`);
-      }
-    }
-  }, []);
-
-  // ── Continuous real-time GPS tracking listener ──
-  useEffect(() => {
-    if (!isLiveTracking) return;
-    console.log('[App] Starting continuous real-time GPS watch...');
-    const unwatch = watchRealTimeLocation(
-      (pos) => {
-        console.log('[App] Real-time position update:', pos.lat, pos.lng, pos.accuracy);
-        setUserCoords({ lat: pos.lat, lng: pos.lng });
-        if (pos.accuracy) setGpsAccuracy(pos.accuracy);
-        weatherService.reverseGeocode(pos.lat, pos.lng)
-          .then(rev => {
-            if (rev.formatted || rev.city) {
-              setLocationName(rev.formatted || rev.city);
-            }
-          })
-          .catch(() => {});
-      },
-      (err) => {
-        console.warn('[App] Real-time tracking error:', err);
-      }
-    );
-    return () => {
-      console.log('[App] Stopping continuous real-time GPS watch');
-      unwatch();
-    };
-  }, [isLiveTracking]);
   const [fabMenuOpen, setFabMenuOpen] = useState(false);
   const [traceVerifyId, setTraceVerifyId] = useState<string | undefined>(undefined);
   const [screenData, setScreenData] = useState<any>(null);
-  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'mobile' | 'studio'>('mobile');
-  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
-  const [currentTime, setCurrentTime] = useState<string>('09:41');
-
-  useEffect(() => {
-    const updateClock = () => {
-      const d = new Date();
-      const h = String(d.getHours()).padStart(2, '0');
-      const m = String(d.getMinutes()).padStart(2, '0');
-      setCurrentTime(`${h}:${m}`);
-    };
-    updateClock();
-    const iv = setInterval(updateClock, 30000);
-    return () => clearInterval(iv);
-  }, []);
-
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setIsCommandPaletteOpen(prev => !prev);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   // Admin fast-path handled above at state init time
 
@@ -247,7 +149,7 @@ const AppContent: React.FC = () => {
     console.log('[App] Re-fetching weather for coords:', userCoords.lat, userCoords.lng);
     weatherService.getWeather(userCoords.lat, userCoords.lng)
       .then(wd => setWeather(wd))
-      .catch(e => console.error('[App] Weather refresh failed:', e?.message || String(e)));
+      .catch(e => console.error('[App] Weather refresh failed:', e?.message));
     // Also auto-refresh every 5 minutes
     const iv = setInterval(() => {
       weatherService.getWeather(userCoords.lat, userCoords.lng)
@@ -277,135 +179,219 @@ const AppContent: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log("[App] useEffect fired. showSplash:", showSplash);
+    if (showSplash) return;
     // If we came via the admin redirect, skip all auth/init logic
     if (currentScreen === 'admin') return;
 
     const init = async () => {
-      console.log("[App] init called immediately on mount");
-      log("[App] Init started");
+      console.log("[App] init called");
+      log("[App] Init started (No Delay)");
+
+      if (!userService) {
+        log("[App] CRITICAL: userService is undefined!");
+      } else {
+        log("[App] userService is present");
+      }
 
       const savedLang = localStorage.getItem('ks_lang') as Language;
       if (savedLang) setLanguage(savedLang);
 
-      let token = localStorage.getItem('ks_token');
-      // Auto-provision demo farmer session for instant, seamless preview
-      if (!token) {
-        token = 'kd_demo_token_ramesh';
-        localStorage.setItem('ks_token', token);
-      }
-      log(`[App] Token active: ${!!token}`);
+      const token = localStorage.getItem('ks_token');
+      log(`[App] Token found: ${!!token}`);
 
-      // 1. Initial coordinates from saved storage or auto-detection
-      let initialLocation = { lat: 21.1458, lng: 79.0882 };
-      let initialName = "Locating real-time GPS...";
-      try {
-        const saved = localStorage.getItem('kd_saved_location');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed?.lat && parsed?.lng) {
-            initialLocation = { lat: Number(parsed.lat), lng: Number(parsed.lng) };
-            if (parsed.name) initialName = parsed.name;
-            if (parsed.accuracy) setGpsAccuracy(parsed.accuracy);
+      // ── INSTANT STARTUP: restore cached profile synchronously so the UI
+      // renders immediately without waiting on GPS/network. Fresh data is
+      // re-synced in the background afterwards. ──
+      let restoredFromCache = false;
+      if (token) {
+        const cachedRaw = localStorage.getItem('ks_profile_cache');
+        if (cachedRaw) {
+          try {
+            const cached = JSON.parse(cachedRaw);
+            if (cached.crops && typeof cached.crops === 'string') {
+              cached.crops = cached.crops.split(',').filter(Boolean);
+            }
+            setUser(cached);
+            setCurrentScreen(cached.name ? 'home' : 'profile');
+            if (cached.language) setLanguage(cached.language);
+            setLoading(false); // show app NOW — no spinner while network wakes up
+            restoredFromCache = true;
+            log("[App] Instant render from local cache (background sync will refresh)");
+          } catch {
+            // Corrupt cache — fall through to normal flow
           }
         }
-      } catch {}
-
-      setUserCoords(initialLocation);
-      setLocationName(initialName);
-
-      // 2. Query pinpoint real-time GPS asynchronously
-      getPinpointLocation({ enableHighAccuracy: true, timeout: 8000 })
-        .then((pinpoint) => {
-          log(`[App] Pinpoint real-time GPS locked: ${pinpoint.lat}, ${pinpoint.lng} (±${pinpoint.accuracy}m)`);
-          updateAppLocation({
-            lat: pinpoint.lat,
-            lng: pinpoint.lng,
-            accuracy: pinpoint.accuracy
-          }, true);
-        })
-        .catch((err) => {
-          log(`[App] Real-time GPS notice: ${err?.message || err}`);
-          if (!localStorage.getItem('kd_saved_location')) {
-            weatherService.reverseGeocode(initialLocation.lat, initialLocation.lng)
-              .then(rev => setLocationName(rev.formatted || rev.city))
-              .catch(() => setLocationName("Pinpoint Location"));
-          }
-        });
+      } else {
+        // No token at all: go straight to auth without a spinner
+        log("[App] No token, go to Auth");
+        setCurrentScreen('auth');
+        setLoading(false);
+        restoredFromCache = true;
+      }
 
       try {
-        log("[App] Fetching profile...");
-        const defaultProfile: UserProfile = {
-          name: "Ramesh Patil",
-          phone: "9876543210",
-          state: "Maharashtra",
-          district: "Nagpur",
-          land_size: 2.5,
-          crops: ["Wheat", "Cotton", "Orange"],
-          soil_type: "Black Cotton Soil",
-          language: savedLang || "en"
+        // GPS can be slow — cap it at 4s so it never blocks startup
+        const location = await Promise.race([
+          getUserLocation(),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000)),
+        ]).catch(() => null);
+
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Timeout")), 60000)
+        );
+        timeoutPromise.catch(() => { });
+
+      if (token && !restoredFromCache) {
+          log("[App] Fetching profile...");
+          try {
+            const profile = await Promise.race([
+              userService.getProfile(),
+              new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Timeout")), 10000))
+            ]) as UserProfile;
+
+            log(`[App] Profile fetched: ${profile?.name}`);
+
+            // Normalize crops field — backend returns comma-string, we need array
+            if (profile.crops && typeof profile.crops === 'string') {
+              (profile as any).crops = (profile.crops as string).split(',').filter(Boolean);
+            }
+
+            if (location) profile.location = location;
+
+            // Cache the profile locally so app works even if backend is slow
+            localStorage.setItem('ks_profile_cache', JSON.stringify(profile));
+
+            setUser(profile);
+            setCurrentScreen(profile.name ? 'home' : 'profile');
+            if (profile.language) setLanguage(profile.language);
+            log("[App] Profile loaded, going to: " + (profile.name ? 'home' : 'profile'));
+          } catch (profileErr: any) {
+            log(`[App] Profile fetch failed: ${profileErr.message}`);
+
+            // Try restoring from local cache before giving up
+            const cachedRaw = localStorage.getItem('ks_profile_cache');
+            if (cachedRaw) {
+              try {
+                const cached = JSON.parse(cachedRaw);
+                if (location) cached.location = location;
+                setUser(cached);
+                setCurrentScreen(cached.name ? 'home' : 'profile');
+                log("[App] Restored from local cache");
+              } catch {
+                // Cache corrupt — force re-login only on auth errors, not network errors
+                if (profileErr.response?.status === 401) {
+                  localStorage.removeItem('ks_token');
+                  localStorage.removeItem('ks_profile_cache');
+                  setCurrentScreen('auth');
+                } else {
+                  setCurrentScreen('profile'); // let them retry saving
+                }
+              }
+            } else {
+              // Only clear token on explicit 401 Unauthorized
+              if (profileErr.response?.status === 401) {
+                localStorage.removeItem('ks_token');
+                setCurrentScreen('auth');
+              } else {
+                setCurrentScreen('profile');
+              }
+            }
+          }
+        } else if (token && restoredFromCache) {
+          // Already showing cached UI — silently refresh profile in background
+          userService.getProfile()
+            .then((profile: UserProfile) => {
+              if (profile.crops && typeof profile.crops === 'string') {
+                (profile as any).crops = (profile.crops as string).split(',').filter(Boolean);
+              }
+              if (location) profile.location = location;
+              localStorage.setItem('ks_profile_cache', JSON.stringify(profile));
+              setUser(profile);
+              log("[App] Background profile sync complete");
+            })
+            .catch((e: any) => {
+              log(`[App] Background profile sync failed: ${e?.message || e}`);
+              // Only force logout on explicit 401 — never on network errors
+              if (e?.response?.status === 401) {
+                localStorage.removeItem('ks_token');
+                localStorage.removeItem('ks_profile_cache');
+                setUser(null);
+                setCurrentScreen('auth');
+              }
+            });
+        }
+
+        console.log("[App] Fetching weather/location...");
+        const lat = location?.lat || 21.1458;
+        const lng = location?.lng || 79.0882;
+
+        // Save coords so the weather re-fetch effect picks them up
+        setUserCoords({ lat, lng });
+
+        // ── Reverse geocode: try backend first, then direct BigDataCloud as client-side fallback ──
+        const resolveLocationName = async (lat: number, lng: number) => {
+          // Try backend first
+          try {
+            const locData = await weatherService.reverseGeocode(lat, lng);
+            if (locData && (locData.city || locData.district)) {
+              setLocationName(`${locData.city || ''}${locData.city && locData.district ? ', ' : ''}${locData.district || ''}`);
+              return;
+            }
+          } catch { /* fall through to client-side fallback */ }
+
+          // Backend failed (500) — call BigDataCloud directly from browser (free, no key, no CORS issues)
+          try {
+            const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+            const d = await r.json();
+            const city = d.locality || d.city || d.principalSubdivision || null;
+            const district = d.principalSubdivision || '';
+            if (city) {
+              setLocationName(`${city}${district && district !== city ? ', ' + district : ''}`);
+              return;
+            }
+          } catch { /* ignore */ }
+
+          // Final fallback: show rounded coordinates
+          setLocationName(`${lat.toFixed(2)}°N, ${lng.toFixed(2)}°E`);
         };
 
-        let profile: UserProfile = defaultProfile;
-        try {
-          profile = await Promise.race([
-            userService.getProfile().catch(() => defaultProfile),
-            new Promise<UserProfile>((resolve) => setTimeout(() => resolve(defaultProfile), 1800))
-          ]) as UserProfile;
-        } catch {
-          profile = defaultProfile;
+        if (!locationFetched.current) {
+          locationFetched.current = true;
+          resolveLocationName(lat, lng);
         }
 
-        log(`[App] Profile loaded: ${profile?.name}`);
-
-        if (profile.crops && typeof profile.crops === 'string') {
-          (profile as any).crops = (profile.crops as string).split(',').filter(Boolean);
-        }
-
-        if (initialLocation) profile.location = initialLocation;
-        localStorage.setItem('ks_profile_cache', JSON.stringify(profile));
-
-        setUser(profile);
-        setCurrentScreen(profile.name ? 'home' : 'profile');
-        if (profile.language) setLanguage(profile.language);
-
-        const lat = initialLocation.lat;
-        const lng = initialLocation.lng;
-
-        // Weather load in background for initial coordinates
+        // Weather is now fetched reactively in the useEffect below
+        // (kept as one-shot fallback if GPS arrives before the effect)
         weatherService.getWeather(lat, lng)
           .then((wd) => { setWeather(wd); log("[App] Initial weather loaded"); })
-          .catch((e) => console.warn("[App] Weather fetch notice:", e?.message || String(e)));
+          .catch((e) => console.error("[App] Weather fetch failed:", e?.message || e));
+
 
       } catch (e: any) {
-        log(`[App] Outer init fallback: ${e?.message || e}`);
-        const fallbackUser: UserProfile = {
-          name: "Ramesh Patil",
-          phone: "9876543210",
-          state: "Maharashtra",
-          district: "Nagpur",
-          land_size: 2.5,
-          crops: ["Wheat", "Cotton", "Orange"],
-          soil_type: "Black Cotton Soil",
-          language: savedLang || "en"
-        };
-        setUser(fallbackUser);
-        setCurrentScreen('home');
-      } finally {
-        setLoading(false);
+        log(`[App] Outer init error: ${e.message}`);
+        console.error("[App] Init error:", e);
+        // Only show connection error UI for true network failures, never wipe token
+        if (e.message === "Timeout" || e.message === "Network Error") {
+          setConnectionError(true);
+          setLoading(false);
+          return;
+        }
+        // For any other unexpected error, go to landing but keep the token
+        setCurrentScreen('landing');
       }
+      setLoading(false);
     };
-
     init();
-  }, []);
+  }, [showSplash]);
 
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
-      console.warn("[App Global Error Handled]:", event.error || event.message);
+      console.error("Global Error (Logged):", event.error);
     };
 
     const handleRejection = (event: PromiseRejectionEvent) => {
-      event.preventDefault(); // Mark rejection as handled to prevent runtime uncaught exception
-      console.warn("[App Rejection Handled]:", event.reason);
+      console.error("Unhandled Rejection (Logged):", event.reason);
     };
 
     window.addEventListener('error', handleError);
@@ -459,6 +445,9 @@ const AppContent: React.FC = () => {
     }
     if (screen === 'field-monitor' && data?.plotId) {
       setScreenData({ plotId: data.plotId });
+    }
+    if (screen === 'chat' && data?.initialMessage) {
+      setScreenData({ initialMessage: data.initialMessage });
     }
     setCurrentScreen(screen);
     setFabMenuOpen(false);
@@ -600,16 +589,6 @@ const AppContent: React.FC = () => {
               />
             ))}
           </div>
-
-          <button
-            onClick={() => {
-              setLoading(false);
-              setCurrentScreen('home');
-            }}
-            className="mt-6 text-xs text-green-800/70 hover:text-green-900 bg-white/80 hover:bg-white px-4 py-2 rounded-full font-medium shadow-sm transition-all"
-          >
-            Enter Dashboard →
-          </button>
         </motion.div>
       </div>
     );
@@ -670,38 +649,18 @@ const AppContent: React.FC = () => {
             Server is taking too long to respond. Please check your internet connection and try again.
           </motion.p>
 
-          <div className="flex flex-col gap-3 max-w-xs mx-auto">
-            <motion.button
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              whileTap={{ scale: 0.95 }}
-              whileHover={{ scale: 1.05 }}
-              onClick={() => {
-                setConnectionError(false);
-                setLoading(true);
-                setTimeout(() => {
-                  setLoading(false);
-                  setCurrentScreen('home');
-                }, 300);
-              }}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3.5 rounded-2xl font-bold uppercase tracking-wider shadow-xl shadow-green-300 flex items-center justify-center gap-3 w-full"
-            >
-              <RefreshCw className="w-5 h-5" />
-              Retry Connection
-            </motion.button>
-            <button
-              onClick={() => {
-                setConnectionError(false);
-                setLoading(false);
-                setIsGuestMode(true);
-                setCurrentScreen('home');
-              }}
-              className="text-xs text-gray-600 hover:text-green-700 font-semibold py-2 underline transition-colors"
-            >
-              Continue with Demo Farm (Ramesh Patil)
-            </button>
-          </div>
+          <motion.button
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.05 }}
+            onClick={() => window.location.reload()}
+            className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-wider shadow-xl shadow-green-300 flex items-center gap-3 mx-auto"
+          >
+            <RefreshCw className="w-5 h-5" />
+            Retry Connection
+          </motion.button>
         </motion.div>
       </div>
     );
@@ -741,16 +700,7 @@ const AppContent: React.FC = () => {
           />
         );
       case 'profile':
-        return (
-          <ProfileScreen
-            onComplete={handleProfileComplete}
-            t={t}
-            navigateTo={navigateTo}
-            onLogout={handleLogout}
-            currentLang={language}
-            onLangChange={changeLanguage}
-          />
-        );
+        return <ProfileScreen onComplete={handleProfileComplete} t={t} navigateTo={navigateTo} onLogout={handleLogout} />;
       case 'home':
         return <DashboardScreen
           navigateTo={navigateTo}
@@ -760,17 +710,11 @@ const AppContent: React.FC = () => {
           currentLang={language}
           weather={weather}
           locationName={locationName}
-          userCoords={userCoords}
-          gpsAccuracy={gpsAccuracy}
-          isLiveTracking={isLiveTracking}
-          onToggleLiveTracking={() => setIsLiveTracking(prev => !prev)}
-          onUpdateLocation={updateAppLocation}
-          onOpenSearch={() => setIsCommandPaletteOpen(true)}
         />;
       case 'admin':
         return <AgritechDashboardNew t={t} />;
       case 'chat':
-        return <ChatScreen navigateTo={navigateTo} language={language} t={t} onOpenVoiceAssistant={() => setIsVoiceActive(true)} />;
+        return <ChatScreen navigateTo={navigateTo} language={language} t={t} onOpenVoiceAssistant={() => setIsVoiceActive(true)} initialMessage={screenData?.initialMessage} />;
       case 'vision':
         return <VisionScreen navigateTo={navigateTo} t={t} />;
       case 'vision-result':
@@ -815,12 +759,6 @@ const AppContent: React.FC = () => {
         return <SmartIrrigationScreen navigateTo={navigateTo} />;
       case 'digital-twin':
         return <DigitalTwinScreen navigateTo={navigateTo} />;
-      case 'veo-studio':
-        return <VeoStudioScreen navigateTo={navigateTo} capturedImage={capturedImage} t={t} />;
-      case 'media-gallery':
-        return <MediaGalleryScreen navigateTo={navigateTo} t={t} />;
-      case 'monitoring':
-        return <MonitoringDashboardScreen onBack={() => navigateTo('profile')} t={t} />;
       default:
         return (
           <AuthScreen
@@ -836,243 +774,187 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const showNav = !['landing', 'auth', 'market-detail', 'live-audio', 'carbon-vault', 'scheme-setu', 'landmark', 'chat', 'vision', 'vision-result', 'acoustic-scanner', 'traceability', 'trace-verify', 'field-monitor', 'corporate-dashboard', 'crop-cycle', 'smart-irrigation', 'digital-twin', 'veo-studio', 'media-gallery', 'monitoring'].includes(currentScreen);
+  const showNav = !['landing', 'auth', 'profile', 'market-detail', 'live-audio', 'carbon-vault', 'scheme-setu', 'landmark', 'chat', 'vision', 'vision-result', 'acoustic-scanner', 'traceability', 'trace-verify', 'field-monitor', 'corporate-dashboard', 'crop-cycle', 'smart-irrigation', 'digital-twin'].includes(currentScreen);
 
   return (
-    <div className="min-h-screen bg-[#F7FAF8] text-[#10231D] flex flex-col selection:bg-[#00B86B] selection:text-white" style={{ fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-      {/* ── DESKTOP/TABLET PRO APP BAR (Visible on md+ screens) ── */}
-      <header className="hidden md:flex items-center justify-between px-6 py-3 bg-white border-b border-[#E3EBE6] text-[#10231D] z-50">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-[#E8FBF3] border border-[#B3F0D2] flex items-center justify-center text-[#00B86B]">
-            <Leaf size={18} />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-sm tracking-tight text-[#10231D]">Krishi-Drishti</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E8FBF3] text-[#003D2B] border border-[#B3F0D2]">
-                Farmer Edition
-              </span>
-            </div>
-            <p className="text-[10px] text-[#68756F] font-medium">Smart Agricultural Intelligence &amp; Mandi Advisory</p>
-          </div>
-        </div>
+    <div className="min-h-screen w-full flex items-center justify-center relative"
+      style={{ background: 'linear-gradient(160deg, #020B06 0%, #031208 40%, #041A0E 100%)' }}>
 
-        {/* Center: Viewport Mode Switcher & Global Search */}
-        <div className="flex items-center gap-3">
-          <div className="bg-[#F7FAF8] p-1 rounded-xl flex items-center border border-[#E3EBE6]">
-            <button
-              onClick={() => setViewMode('mobile')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                viewMode === 'mobile'
-                  ? 'bg-white text-[#003D2B] shadow-sm border border-[#E3EBE6]'
-                  : 'text-[#68756F] hover:text-[#10231D]'
-              }`}
-            >
-              <Smartphone size={14} />
-              Mobile Frame
-            </button>
-            <button
-              onClick={() => setViewMode('studio')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                viewMode === 'studio'
-                  ? 'bg-white text-[#003D2B] shadow-sm border border-[#E3EBE6]'
-                  : 'text-[#68756F] hover:text-[#10231D]'
-              }`}
-            >
-              <Monitor size={14} />
-              Expanded View
-            </button>
-          </div>
+      {/* Ambient glow */}
+      <div
+        aria-hidden
+        className="fixed inset-0 pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse 60% 45% at 50% 42%, rgba(0,187,120,0.12), transparent 70%)' }}
+      />
 
-          <button
-            onClick={() => setIsCommandPaletteOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-1.5 bg-[#F7FAF8] hover:bg-[#EBF1EE] border border-[#E3EBE6] rounded-xl text-xs font-medium text-[#10231D] transition-colors"
+      {/* App Frame */}
+      <div
+        className="flex flex-col w-full max-w-md h-[100dvh] sm:h-[94vh] sm:max-h-[920px] relative overflow-hidden rounded-none sm:rounded-[2.5rem]"
+        style={{
+          background: '#020B06',
+          boxShadow: '0 2px 6px rgba(0,40,20,0.5), 0 16px 40px rgba(0,40,20,0.6), 0 60px 120px -20px rgba(0,0,0,0.8), 0 0 80px rgba(0,255,135,0.08)',
+          border: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+      <main className={`flex-1 overflow-y-auto mobile-container relative ${showNav ? 'pb-20' : 'pb-0'}`}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentScreen}
+            initial={{ opacity: 0, x: 30, scale: 0.98 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -30, scale: 0.98 }}
+            transition={{
+              duration: 0.35,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
+            className="h-full"
           >
-            <Search size={14} className="text-[#00B86B]" />
-            <span>Search 20+ Tools...</span>
-            <kbd className="px-1.5 py-0.5 rounded bg-white border border-[#E3EBE6] text-[10px] font-mono text-[#68756F] font-bold">
-              ⌘K
-            </kbd>
-          </button>
-        </div>
+            <React.Suspense fallback={<ScreenFallback />}>
+              {renderScreen()}
+            </React.Suspense>
+          </motion.div>
+        </AnimatePresence>
+      </main>
 
-        {/* Right: Live Telemetry & Emergency Hotline */}
-        <div className="flex items-center gap-4 text-xs">
-          <div className="hidden lg:flex items-center gap-2 text-[#68756F] text-[11px] bg-[#F7FAF8] px-2.5 py-1 rounded-lg border border-[#E3EBE6]">
-            <Radio size={12} className={isLiveTracking ? "text-[#D64545] animate-pulse" : "text-[#00B86B]"} />
-            <span>
-              GPS: {userCoords ? `${userCoords.lat.toFixed(4)}°, ${userCoords.lng.toFixed(4)}° (${locationName.split(',')[0]})` : 'Locating GPS...'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-[11px] text-[#68756F]">
-            {isOnline ? (
-              <span className="flex items-center gap-1 text-[#00B86B] font-semibold">
-                <Wifi size={13} /> Online
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-[#E6A000] font-semibold">
-                <WifiOff size={13} /> Offline
-              </span>
-            )}
-          </div>
-
-          <a
-            href="tel:18001801551"
-            className="flex items-center gap-1.5 px-3 py-1 bg-[#FDE8E8] hover:bg-[#FCD2D2] text-[#D64545] border border-[#F8B4B4] rounded-lg text-xs font-bold transition-colors"
-          >
-            <PhoneCall size={12} />
-            Kisan Call 1800-180-1551
-          </a>
-        </div>
-      </header>
-
-      {/* ── APP CONTAINER WRAPPER ── */}
-      <div className="flex-1 flex items-center justify-center p-0 md:p-4 overflow-hidden">
-        <div
-          className={`flex flex-col h-screen md:h-[92vh] w-full mx-auto relative overflow-hidden bg-white text-[#10231D] transition-all duration-300 ${
-            viewMode === 'studio'
-              ? 'max-w-6xl md:rounded-3xl md:shadow-md md:border md:border-[#E3EBE6]'
-              : 'max-w-md md:rounded-[36px] md:shadow-lg md:border-2 md:border-[#E3EBE6]'
-          }`}
-          style={{ transform: 'translate(0)' }}
-        >
-          {/* Mobile Status Bar (Visible in phone view on desktop) */}
-          {viewMode === 'mobile' && (
-            <div className="hidden md:flex items-center justify-between px-6 pt-3 pb-1 bg-transparent select-none z-30">
-              <span className="text-xs font-bold text-gray-800">{currentTime}</span>
-              {/* Dynamic Island Notch */}
-              <div className="w-24 h-4 bg-black rounded-full flex items-center justify-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-slate-900" />
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/80 animate-pulse" />
-              </div>
-              <div className="flex items-center gap-1.5 text-gray-800">
-                <span className="text-[10px] font-extrabold font-mono">5G</span>
-                <Wifi size={13} strokeWidth={2.5} />
-                <Battery size={14} strokeWidth={2.5} className="fill-gray-800" />
-              </div>
-            </div>
-          )}
-
-          {/* Offline Toast Banner */}
-          {!isOnline && (
-            <div className="bg-amber-500 text-slate-950 px-4 py-1.5 text-xs font-bold flex items-center justify-between z-50">
-              <div className="flex items-center gap-2">
-                <WifiOff size={14} />
-                <span>Offline Field Mode Active · Scans and plots are saved locally</span>
-              </div>
-              <span className="text-[10px] bg-slate-950 text-amber-400 px-2 py-0.5 rounded font-mono">
-                Auto-Sync on 4G
-              </span>
-            </div>
-          )}
-
-          {/* Main Scrollable Canvas */}
-          <main className={`flex-1 overflow-y-auto mobile-container relative ${showNav ? 'pb-20' : 'pb-0'}`}>
-            <AnimatePresence mode="wait">
+      {/* ============ ENHANCED FLOATING ACTION BUTTON WITH EXPANDABLE MENU ============ */}
+      {showNav && (
+        <>
+          {/* Backdrop when FAB menu is open */}
+          <AnimatePresence>
+            {fabMenuOpen && (
               <motion.div
-                key={currentScreen}
-                initial={{ opacity: 0, x: 20, scale: 0.99 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: -20, scale: 0.99 }}
-                transition={{
-                  duration: 0.25,
-                  ease: [0.25, 0.1, 0.25, 1],
-                }}
-                className="h-full"
-              >
-                <React.Suspense fallback={<ScreenSkeleton />}>
-                  {renderScreen()}
-                </React.Suspense>
-              </motion.div>
-            </AnimatePresence>
-          </main>
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setFabMenuOpen(false)}
+                className="absolute inset-0 bg-black/40 backdrop-blur-sm z-[90] rounded-b-[2.5rem]"
+              />
+            )}
+          </AnimatePresence>
 
-          {/* ============ ANCHORED FLOATING ACTION BUTTON WITH EXPANDABLE MENU ============ */}
-          {showNav && (
-            <>
-              {/* Backdrop when FAB menu is open */}
-              <AnimatePresence>
-                {fabMenuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setFabMenuOpen(false)}
-                    className="absolute inset-0 bg-black/40 backdrop-blur-sm z-[90]"
-                  />
-                )}
-              </AnimatePresence>
-
-              {/* Voice Assistant Sub-button */}
-              <AnimatePresence>
-                {fabMenuOpen && (
-                  <motion.button
-                    initial={{ scale: 0, y: 0, opacity: 0 }}
-                    animate={{ scale: 1, y: -72, opacity: 1 }}
-                    exit={{ scale: 0, y: 0, opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    onClick={() => {
-                      setIsVoiceActive(true);
-                      setFabMenuOpen(false);
-                    }}
-                    className="absolute bottom-20 right-4 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-full shadow-2xl shadow-purple-500/50 flex items-center justify-center z-[100] border-2 border-white/30"
-                  >
-                    <Mic size={20} />
-                    <motion.span
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 }}
-                      className="absolute right-14 bg-gray-900 text-white text-xs font-bold px-2.5 py-1 rounded-lg whitespace-nowrap shadow-lg"
-                    >
-                      Voice Assistant
-                    </motion.span>
-                  </motion.button>
-                )}
-              </AnimatePresence>
-
-              {/* Chat Sub-button */}
-              <AnimatePresence>
-                {fabMenuOpen && (
-                  <motion.button
-                    initial={{ scale: 0, y: 0, opacity: 0 }}
-                    animate={{ scale: 1, y: -136, opacity: 1 }}
-                    exit={{ scale: 0, y: 0, opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.05 }}
-                    onClick={() => {
-                      setCurrentScreen('chat');
-                      setFabMenuOpen(false);
-                    }}
-                    className="absolute bottom-20 right-4 w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-full shadow-2xl shadow-blue-500/50 flex items-center justify-center z-[100] border-2 border-white/30"
-                  >
-                    <MessageCircle size={20} />
-                    <motion.span
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.15 }}
-                      className="absolute right-14 bg-gray-900 text-white text-xs font-bold px-2.5 py-1 rounded-lg whitespace-nowrap shadow-lg"
-                    >
-                      AI Chat
-                    </motion.span>
-                  </motion.button>
-                )}
-              </AnimatePresence>
-
-              {/* Floating Action Button for AI Assistant */}
+          {/* Voice Assistant Sub-button */}
+          <AnimatePresence>
+            {fabMenuOpen && (
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setFabMenuOpen(!fabMenuOpen)}
-                className="absolute bottom-20 right-4 w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 text-white rounded-full shadow-2xl shadow-emerald-500/50 flex items-center justify-center z-[101] border-2 border-white/30"
+                initial={{ scale: 0, y: 0, opacity: 0 }}
+                animate={{ scale: 1, y: -80, opacity: 1 }}
+                exit={{ scale: 0, y: 0, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                onClick={() => {
+                  setIsVoiceActive(true);
+                  setFabMenuOpen(false);
+                }}
+                className="absolute bottom-24 right-6 w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-full shadow-2xl shadow-purple-500/50 flex items-center justify-center z-[100] border-2 border-white/30"
               >
-                <motion.div animate={{ rotate: fabMenuOpen ? 45 : 0 }} transition={{ duration: 0.2 }}>
-                  <Sparkles size={24} />
-                </motion.div>
+                <Mic size={22} />
+                <motion.span
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="absolute right-16 bg-gray-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg"
+                >
+                  Voice Assistant
+                </motion.span>
               </motion.button>
-            </>
-          )}
+            )}
+          </AnimatePresence>
 
-          {/* Global Voice Assistant Modal */}
+          {/* Chat Sub-button */}
+          <AnimatePresence>
+            {fabMenuOpen && (
+              <motion.button
+                initial={{ scale: 0, y: 0, opacity: 0 }}
+                animate={{ scale: 1, y: -160, opacity: 1 }}
+                exit={{ scale: 0, y: 0, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.05 }}
+                onClick={() => {
+                  setCurrentScreen('chat');
+                  setFabMenuOpen(false);
+                }}
+                className="absolute bottom-24 right-6 w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-full shadow-2xl shadow-blue-500/50 flex items-center justify-center z-[100] border-2 border-white/30"
+              >
+                <MessageCircle size={22} />
+                <motion.span
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="absolute right-16 bg-gray-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg"
+                >
+                  AI Chat
+                </motion.span>
+              </motion.button>
+            )}
+          </AnimatePresence>
+
+          {/* Main FAB Button with pulse effect */}
+          <motion.button
+            onClick={() => setFabMenuOpen(!fabMenuOpen)}
+            whileTap={{ scale: 0.9 }}
+            className="absolute bottom-24 right-6 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center z-[101] overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)',
+              boxShadow: '0 10px 40px rgba(16, 185, 129, 0.5)',
+            }}
+          >
+            {/* Pulse rings */}
+            {!fabMenuOpen && (
+              <>
+                <motion.div
+                  animate={{
+                    scale: [1, 1.8],
+                    opacity: [0.5, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                  }}
+                  className="absolute inset-0 rounded-full bg-green-400"
+                />
+                <motion.div
+                  animate={{
+                    scale: [1, 1.8],
+                    opacity: [0.5, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: 1,
+                  }}
+                  className="absolute inset-0 rounded-full bg-emerald-400"
+                />
+              </>
+            )}
+
+            {/* Icon with rotation animation */}
+            <motion.div
+              animate={{ rotate: fabMenuOpen ? 135 : 0 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="relative z-10"
+            >
+              <Sparkles size={28} className="text-white drop-shadow-lg" />
+            </motion.div>
+
+            {/* Shimmer effect */}
+            <motion.div
+              animate={{
+                x: ['-100%', '200%'],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
+            />
+          </motion.button>
+        </>
+      )}
+
+      {/* Global Voice Assistant Modal (lazy: pulls in @google/genai only when opened) */}
+      {isVoiceActive && (
+        <React.Suspense fallback={null}>
           <VoiceAssistantModal
             isOpen={isVoiceActive}
             onClose={() => setIsVoiceActive(false)}
@@ -1082,26 +964,13 @@ const AppContent: React.FC = () => {
               setCurrentScreen('chat');
             }}
           />
+        </React.Suspense>
+      )}
 
-          {/* Anchored Bottom Navigation */}
-          {showNav && (
-            <BottomNav
-              currentScreen={currentScreen}
-              onNavigate={navigateTo}
-              isExpandedView={viewMode === 'studio'}
-            />
-          )}
-        </div>
+      {showNav && (
+        <BottomNav currentScreen={currentScreen} onNavigate={navigateTo} />
+      )}
       </div>
-
-      {/* Global Command Palette (⌘K) */}
-      <CommandPalette
-        isOpen={isCommandPaletteOpen}
-        onClose={() => setIsCommandPaletteOpen(false)}
-        onNavigate={navigateTo}
-        onOpenVoice={() => setIsVoiceActive(true)}
-        currentLang={language}
-      />
     </div>
   );
 };

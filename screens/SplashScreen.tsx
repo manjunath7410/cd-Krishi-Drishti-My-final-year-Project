@@ -7,29 +7,19 @@ interface SplashScreenProps {
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     const [fadeOut, setFadeOut] = useState(false);
-    const onFinishRef = React.useRef(onFinish);
-    onFinishRef.current = onFinish;
 
     useEffect(() => {
         const timer = setTimeout(() => {
             setFadeOut(true);
-            setTimeout(() => onFinishRef.current?.(), 400);
-        }, 1200);
+            setTimeout(onFinish, 400);
+        }, 1200); // was 2500ms — startup felt sluggish; 1.2s is enough to brand
 
         return () => clearTimeout(timer);
-    }, []);
-
-    const handleDismiss = () => {
-        setFadeOut(true);
-        setTimeout(() => onFinishRef.current?.(), 150);
-    };
+    }, [onFinish]);
 
     return (
         <div
-            onClick={handleDismiss}
-            role="button"
-            tabIndex={0}
-            className={`absolute inset-0 z-50 flex flex-col items-center justify-center transition-opacity duration-400 cursor-pointer ${fadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            className={`absolute inset-0 z-50 flex flex-col items-center justify-center transition-opacity duration-500 ${fadeOut ? 'opacity-0' : 'opacity-100'
                 }`}
             style={{
                 backgroundImage: 'linear-gradient(rgba(0,0,0,0.3), rgba(255,255,255,0.8)), url(https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1080)',
@@ -68,13 +58,10 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
                     <div className="w-3 h-3 bg-green-400 rounded-full animate-bounce shadow-lg border border-white" style={{ animationDelay: '300ms' }}></div>
                 </div>
             </div>
-            <div className="absolute bottom-6 text-center z-10 flex flex-col items-center gap-1.5">
-                <p className="text-xs text-green-800 font-bold bg-white/70 px-3 py-1 rounded-full backdrop-blur-sm">
+            <div className="absolute bottom-8 text-center z-10">
+                <p className="text-xs text-green-800 font-bold bg-white/60 px-3 py-1 rounded-full backdrop-blur-sm">
                     Powered by AI & Satellite Data
                 </p>
-                <span className="text-[10px] text-green-900/60 font-semibold tracking-wider uppercase">
-                    Tap to enter
-                </span>
             </div>
         </div>
     );

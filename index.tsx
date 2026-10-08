@@ -3,10 +3,6 @@ console.log("[Index] Script started");
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { initMonitoring } from './src/services/monitoringService';
-
-// Initialize Sentry Global Error Tracking and Performance Monitoring
-initMonitoring();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -18,3 +14,11 @@ root.render(
   <App />
 );
 
+// Fade out the pre-hydration boot splash as soon as React mounts
+requestAnimationFrame(() => {
+  const splash = document.getElementById('boot-splash');
+  if (splash) {
+    splash.classList.add('done');
+    setTimeout(() => splash.remove(), 500);
+  }
+});
